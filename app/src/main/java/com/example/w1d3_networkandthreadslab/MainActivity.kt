@@ -17,20 +17,34 @@ import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
 
+    private val mHandler: Handler = object :
+        Handler(Looper.getMainLooper()) {
+        override fun handleMessage(inputMessage: Message) {
+            if (inputMessage.what == 0) {
+                showData.text = inputMessage.obj.toString()
+            }
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if (isConnected) showData.text = "yes"
-        else
-            showData.text = "no"
+        if (isNetworkAvailable()) {
+            val myRunnable = Handler(
+                mHandler,
+            )
+            val myThread = Thread(myRunnable)
+            myThread.start()
+        }
+
+        button.setOnClickListener {
+            finish();
+            startActivity(getIntent());
+        }
 
     }
+    private fun isNetworkAvailable(): Boolean =
+        (this.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager).isDefaultNetworkActive
 
-    val Context.isConnected: Boolean
-        get() {
-            return (getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
-                .activeNetworkInfo?.isConnected == true
-        }
 }
 
 
